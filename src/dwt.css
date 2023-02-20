@@ -1,3 +1,12 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+.firstlevel {
+    display: flex;
+    gap: 40px;
+}
 .UI {
     display: flex;
     gap: 40px;
@@ -15,6 +24,7 @@
 .pixel {
 display: flex;
 justify-content: flex-start;
+gap: 40px;
 }
 .pixel__label {
    display: flex;

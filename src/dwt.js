@@ -10,6 +10,8 @@ export default class DWT extends React.Component {
       autofeader: false,
       showUi: false,
     };
+    this.showUiRef = React.createRef();
+    this.autoFeedRef = React.createRef();
   }
   DWObject = null;
   containerId = "dwtcontrolContainer";
@@ -79,29 +81,7 @@ export default class DWT extends React.Component {
    * @param indices Specify the images
    * @param type Specify the file type
    */
-  upload(indices, type) {
-    var protocol = Dynamsoft.Lib.detect.ssl ? "https://" : "http://",
-      port = window.location.port === "" ? 80 : window.location.port,
-      actionPage = "/upload.aspx";
-    // path to the server-side script
-    var url = protocol + window.location.hostname + ":" + port + actionPage;
-    var fileName = "SampleFile" + this.getExtension(type);
-    if (this.DWObject) {
-      this.DWObject.HTTPUpload(
-        url,
-        indices,
-        type,
-        Dynamsoft.DWT.EnumDWT_UploadDataFormat.Binary,
-        fileName,
-        function () {
-          console.log("Success");
-        },
-        function (errCode, errString, responseStr) {
-          console.log(errString);
-        }
-      );
-    }
-  }
+
   /**
    * Return the extension string of the specified image type.
    * @param type The image type (number).
@@ -128,7 +108,8 @@ export default class DWT extends React.Component {
   acquireImage() {
     if (this.DWObject) {
       this.DWObject.SelectSourceAsync()
-        .then(() => {
+        .then((data) => {
+          console.log(data);
           return this.DWObject.AcquireImageAsync({
             IfDisableSourceAfterAcquire: true,
           });
@@ -158,11 +139,11 @@ export default class DWT extends React.Component {
           <div className="all_checkbox_radiobox">
             <div className="firstlevel">
               <label>
-                <input type="checkbox" onChange={this.changeHandler} />
+                <input type="checkbox" ref={this.showUiRef} />
                 Show UI
               </label>
               <label>
-                <input type="checkbox" onChange={this.changeHandler} />
+                <input type="checkbox" ref={this.autoFeedRef} />
                 AutoFeeder
               </label>
             </div>
@@ -218,11 +199,17 @@ export default class DWT extends React.Component {
           <button
             onClick={() => {
               //Save the scanned image(s) under 'Document1'.
-              this.DWObject.CreateDocument("Document1");
-              this.DWObject.OpenDocument("Document1"); //Need to call OpenDocument after CreateDocument.
+              //Need to call OpenDocument after CreateDocument.
 
               const successCallback = () => {
                 console.log("successful");
+                if (!this.showUiRef.current.checked) {
+                  this.DWObject.IfShowUI = false;
+                }
+                if (this.autoFeedRef.current.checked) {
+                  this.DWObject.IfAutoFeed = true;
+                }
+
                 this.DWObject.SaveAllAsPDF(
                   "Image1",
                   () => console.log("success"),
